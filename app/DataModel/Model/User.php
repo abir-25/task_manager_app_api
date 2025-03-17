@@ -13,6 +13,8 @@ class User {
     private $name;
     private $username;
     private $password;
+    private $phone;
+    private $profileImg;
     private $created_at;
     private $updated_at;
     private $status;
@@ -89,6 +91,47 @@ class User {
     public function setPassword($password): void
     {
         $this->password = $password;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPhone()
+    {
+        return $this->phone;
+    }
+
+    /**
+     * @param mixed $phone
+     */
+    public function setPhone($phone): void
+    {
+        $this->phone = $phone;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getProfileImg()
+    {
+        return $this->profileImg;
+    }
+
+    /**
+     * @param mixed $profileImg
+     */
+    public function setProfileImg($profileImg): void
+    {
+        $this->profileImg = $profileImg;
+    }
+
+    public function getProfileImgUrl()
+    {
+        if($this->profileImg)
+        {
+            return url('/uploads/images/user/'.$this->profileImg);
+        }
+        return null;
     }
 
     /**

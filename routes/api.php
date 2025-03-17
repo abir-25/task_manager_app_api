@@ -10,13 +10,14 @@ Route::get('/', function () {
 });
 
 Route::group(['prefix' => '/v1'], function () {
-    Route::post('/register',[Account::class,'postRegisterAction']);
+    Route::post('/signup',[Account::class,'postSignupAction']);
     Route::post('/login',[Account::class,'postLoginAction']);
 
     Route::group(['middleware'=>[ 'appToken' ]],function () {
         Route::post('/create-task',[Task::class,'postCreateTaskAction']);
         Route::post('/update-task',[Task::class,'postUpdateTaskAction']);
         Route::post('/update-task-status',[Task::class,'postUpdateTaskStatusAction']);
+        Route::post('/delete-task',[Task::class,'postDeleteTaskAction']);
         Route::get('/get-task-list/{status?}/{dueDate?}',[Task::class,'getTaskList']);
         Route::get('/get-task-info/{taskId}',[Task::class,'getTaskInfoById']);
         Route::get('/search-task/{keyword}',[Task::class,'getSearchTask']);

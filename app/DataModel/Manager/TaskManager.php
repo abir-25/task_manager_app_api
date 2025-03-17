@@ -7,6 +7,9 @@ use Exception;
 
 class TaskManager
 {
+    /**
+     * @throws Exception
+     */
     public function createTask(Task $task): Task
     {
         $queryString      = "insert into tasks(userId, name, description, status, due_date, created_at) values(?,?,?,?,?,?)";
@@ -36,5 +39,26 @@ class TaskManager
         (new Database())->executeQueryWithParameter($queryString, $parameters);
     }
 
+    /**
+     * @throws Exception
+     */
+    public function updateTaskStatus($task): void
+    {
+        $queryString = "UPDATE tasks
+                        SET status = ?, updated_at = ?
+                        WHERE id = ?";
+        $parameters = array($task->getStatus(), now(), $task->getId());
+        (new Database())->executeQueryWithParameter($queryString, $parameters);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function deleteTask($id): void
+    {
+        $queryString = "DELETE FROM tasks WHERE id = ?";
+        $parameters = array($id);
+        (new Database())->executeQueryWithParameter($queryString, $parameters);
+    }
 
 }

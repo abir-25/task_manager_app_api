@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name', 255)->nullable();
             $table->string('username', 255)->unique();
             $table->string('password', 255);
+            $table->string('phone', 20)->nullable();
+            $table->string('profileImg', 255)->nullable();
             $table->tinyInteger('status')->default(1);
             $table->timestamps();
         });

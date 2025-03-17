@@ -22,7 +22,7 @@ class AccountController extends Controller
     private int $errorStatusCode    = 500;
     private int $notFound           = 404;
 
-    public function postRegisterAction(Request $request): \Illuminate\Http\JsonResponse
+    public function postSignupAction(Request $request): \Illuminate\Http\JsonResponse
     {
         $data        = $request->all();
         $user        = new User();

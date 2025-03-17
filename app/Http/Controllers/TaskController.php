@@ -86,4 +86,39 @@ class TaskController extends Controller
         }
     }
 
+    public function postUpdateTaskStatusAction(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data           = $request->all();
+        $task           = new Task();
+        $taskManager    = new TaskManager();
+        $task->mapper($data);
+
+        try {
+            if (!array_key_exists($data["status"], TaskArray::$taskStatus)) {
+                throw new Exception("Invalid status value: ".$data["status"]);
+            }
+
+            $taskManager->updateTaskStatus($task);
+            $taskInfo = $task->toJSON();
+
+            return globalResponse($taskInfo, "Congrats! Your task status is updated successfully", true, $this->successStatusCode);
+        } catch (\Exception $ex){
+            return globalResponse([], $ex->getMessage(), false, $this->errorStatusCode);
+        }
+    }
+
+    public function postDeleteTaskAction(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data           = $request->all();
+        $taskManager    = new TaskManager();
+
+        try {
+            $taskManager->deleteTask($data['id']);
+
+            return globalResponse([], "Congrats! Your task is deleted successfully", true, $this->successStatusCode);
+        } catch (\Exception $ex){
+            return globalResponse([], $ex->getMessage(), false, $this->errorStatusCode);
+        }
+    }
+
 }
