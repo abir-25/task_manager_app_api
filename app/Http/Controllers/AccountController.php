@@ -72,7 +72,9 @@ class AccountController extends Controller
                     'loggedIn'        => true,
                     'id'              => $user->getId(),
                     'name'            => $user->getName(),
+                    'phone'           => $user->getPhone(),
                     'username'        => $user->getUserName(),
+                    'profileImg'      => $user->getProfileImg(),
                     'status'          => $user->getStatus(),
                     'jwToken'         => $token
             ];
@@ -112,7 +114,9 @@ class AccountController extends Controller
                         'loggedIn'        => true,
                         'id'              => $userInfo['id'],
                         'name'            => $userInfo['name'],
-                        'username'        => $user->getUserName(),
+                        'phone'           => $userInfo['phone'],
+                        'username'        => $userInfo['username'],
+                        'profileImg'      => $userInfo['profileImg'],
                         'status'          => $userInfo['status'],
                         'jwToken'         => $token
                     ];
@@ -132,4 +136,55 @@ class AccountController extends Controller
             return globalResponse([], "Well, this is awkward! Something broke. Not your fault. Fault is here: ".$ex->getMessage(), false, $this->errorStatusCode);
         }
     }
+
+    public function getUserInfoAction(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data     = $request->all();
+        try {
+            $userInfo = (new UserManager())->getUserInfo($data["userId"]);
+            return globalResponse($userInfo->toJson(), "User information fetched successfully", true, $this->successStatusCode);
+        }
+        catch (\Exception $ex){
+            return globalResponse([], "Well, this is awkward! Something broke. Not your fault. Fault is here: ".$ex->getMessage(), false, $this->errorStatusCode);
+        }
+
+    }
+
+    public function postUpdateUserAction(Request $request){
+        $data         = $request->all();
+        $userManager  = new UserManager();
+        $userId       =  $data['userId'];
+
+        $user = new User();
+        $user->mapper($data);
+        $user->setId($userId);
+        try {
+            $userManager->updateUserInfo($user);
+
+            if($request->file('profileImg'))
+            {
+                $rules = array(
+                    'profileImg' => 'mimes:jpeg,jpg,png,gif|max:4000'
+                );
+                $validator = \Validator::make($request->all(), $rules);
+
+                if($validator->fails()){
+                    return response()->json($validator->errors(),400);
+                }
+
+                $image =$request->file('profileImg');
+                $ext = $image->getClientOriginalExtension();
+                $fileName = time().$user->getId().'.'.$ext;
+                $image->move(public_path().'/uploads/images/user/', $fileName);
+                $user->setProfileImg($fileName);
+                $userManager->updateUserProfileImg($user->getId(), $fileName);
+            }
+
+            $user = $userManager->updateUserInfoInCache($user->getId());
+            return globalResponse($user->toJson(), 'Congrats! Your update was purrrfectly successful!', true, $this->successStatusCode);
+        } catch(\Exception $ex){
+            return globalResponse([], $ex->getMessage(), false, $this->errorStatusCode);
+        }
+    }
+
 }

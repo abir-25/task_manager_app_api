@@ -198,13 +198,25 @@ class User {
         $this->token = $token;
     }
 
+    public function mapper($data): void
+    {
+        $this->id = (!empty($data['id'])) ? $data['id'] : null;
+        $this->username = (!empty($data['username'])) ? $data['username'] : null;
+        $this->password = (!empty($data['password'])) ? $data['password'] : null;
+        $this->name =(!empty($data['name'])) ? $data['name'] : null;
+        $this->phone = (!empty($data['phone'])) ? $data['phone'] : null;
+        $this->profileImg = (!empty($data['profileImg'])) ? $data['profileImg'] : null;
+        $this->status = (!empty($data['status'])) ? $data['status'] : 1;
+    }
 
     public function toJson(): array
     {
         return [
             'userId'          => $this->getId(),
             'name'            => $this->getName(),
+            'phone'           => $this->getPhone(),
             'username'        => $this->getUserName(),
+            'profileImgUrl'   => $this->getProfileImgUrl(),
             'status'          => $this->getStatus() ?? 1
         ];
     }

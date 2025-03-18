@@ -121,4 +121,17 @@ class TaskController extends Controller
         }
     }
 
+    public function getTaskStatusReportAction(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data           = $request->all();
+        $taskManager    = new TaskManager();
+
+        try {
+            $taskStatusReport = $taskManager->getTaskStatusReport($data['userId']);
+            return globalResponse($taskStatusReport, "Sir! Your task report is ready", true, $this->successStatusCode);
+        } catch (\Exception $ex){
+            return globalResponse([], $ex->getMessage(), false, $this->errorStatusCode);
+        }
+    }
+
 }

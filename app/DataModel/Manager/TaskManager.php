@@ -3,6 +3,7 @@ namespace App\DataModel\Manager;
 
 use App\DataModel\DBManager\Database;
 use App\DataModel\Model\Task;
+use App\DataModel\Model\TaskArray;
 use Exception;
 
 class TaskManager
@@ -59,6 +60,42 @@ class TaskManager
         $queryString = "DELETE FROM tasks WHERE id = ?";
         $parameters = array($id);
         (new Database())->executeQueryWithParameter($queryString, $parameters);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getTaskStatusReport($userId): array
+    {
+        $queryString = "SELECT status FROM tasks WHERE userId = ? AND
+                        created_at BETWEEN DATE_FORMAT(NOW(), '%Y-%m-01') AND LAST_DAY(NOW())";
+        $params      = array($userId);
+        $tmpList     =  (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
+        return $this->mapStatusReport($tmpList);
+    }
+
+    public function mapStatusReport($tmpList): array
+    {
+        $taskCounts = array_map(function ($value) {
+            return 0;
+        }, TaskArray::$taskStatus);
+
+        if (!empty($tmpList)) {
+            foreach ($tmpList as $task) {
+                if (isset($taskCounts[$task->status])) {
+                    $taskCounts[$task->status]++;
+                }
+            }
+        }
+
+        $result = [];
+        foreach ($taskCounts as $status => $count) {
+            $result[] = [
+                "status" => $status,
+                "count" => $count
+            ];
+        }
+        return $result;
     }
 
 }

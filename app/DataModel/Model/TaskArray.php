@@ -9,8 +9,8 @@ class TaskArray {
     public static $apiTimeToLive = 63113852;
 
     public static $taskStatus = array(
-        'To Do' => 0,
-        'In Progress' => 1,
-        'Done' => 2
+        'To Do' => "todo",
+        'In Progress' => "inProgress",
+        'Done' => "done"
     );
 }

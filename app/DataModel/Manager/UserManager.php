@@ -8,11 +8,17 @@ class UserManager
 {
     public $appTokenCacheKey = "app_token";
 
+    /**
+     * @throws \Exception
+     */
     public function createUser(User $user): User
     {
         return $this->registerUser($user);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function registerUser(User $user): User
     {
         $queryString      = "insert into users(username, password, status, created_at) values(?,?,?,?)";
@@ -35,7 +41,10 @@ class UserManager
         $cacheManager->setToCacheForever($this->appTokenCacheKey,$tokenList);
     }
 
-    private function getUserInfo($userId)
+    /**
+     * @throws \Exception
+     */
+    public function getUserInfo($userId)
     {
         $userInfo = $this->getUserInfoFromCache($userId);
         if ($userInfo == null) {
@@ -50,6 +59,9 @@ class UserManager
         return (new CacheManager())->getFromCache($key);
     }
 
+    /**
+     * @throws \Exception
+     */
     public function updateUserInfoInCache($userId): User
     {
         $userInfo = $this->mapUserInfo($this->getUserInfoByUserId($userId));
@@ -61,31 +73,60 @@ class UserManager
     {
         $userInfo = reset($userInfo);
         $user = new User();
-        $user->setId($userInfo['userId']);
-        $user->setName($userInfo['name']);
-        $user->setUserName($userInfo['username']);
-        $user->setStatus($userInfo['status'] ?? 1);
+        $user->setId($userInfo->id);
+        $user->setName($userInfo->name);
+        $user->setUserName($userInfo->username);
+        $user->setPhone($userInfo->phone);
+        $user->setProfileImg($userInfo->profileImg);
+        $user->setStatus($userInfo->status ?? 1);
         return $user;
     }
 
-    private function getUserInfoByUserId($userId): array|string
+    /**
+     * @throws \Exception
+     */
+    private function getUserInfoByUserId($userId): array
     {
-        $queryString = "SELECT us.name, us.userId, us.userType, us.username, us.profile_img, us.userEmail, us.userPhoneNo, sur.roleId FROM users us LEFT JOIN shop_users_roles sur ON us.userId = sur.userId WHERE us.userId=?";
-
+        $queryString = "SELECT id, name, username, phone, profileImg, status FROM users
+                        WHERE id=?";
         $params = array($userId);
         return (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
     }
 
+    /**
+     * @throws \Exception
+     */
     public function getUserInfoByUsername($username): ?array
     {
-        $queryString = "SELECT id, name, username, status, password FROM users  WHERE username=?";
+        $queryString = "SELECT id, name, username, password, phone, profileImg, status FROM users WHERE username=?";
         $params = array($username);
         return (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
     }
 
-    private function setUserInfoInCache($userId, $value): void
+    public function setUserInfoInCache($userId, $value): void
     {
         $key = "user_info_" . $userId;
         (new CacheManager())->setToCacheForever($key, $value);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function updateUserInfo(User $user): void
+    {
+        $queryString = "UPDATE users SET name = ?, phone = ?, updated_at = ?
+                        WHERE id = ?";
+        $parameters = array($user->getName(), $user->getPhone(), now(), $user->getId());
+        (new Database())->executeQueryWithParameter($queryString, $parameters);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function updateUserProfileImg($userId, $img)
+    {
+        $queryString = "UPDATE users SET profileImg = ?, updated_at = ? WHERE id = ?";
+        $parameters = array($img, now(), $userId);
+        (new Database())->executeQueryWithParameter($queryString, $parameters);
     }
 }
