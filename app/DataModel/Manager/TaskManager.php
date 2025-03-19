@@ -98,4 +98,19 @@ class TaskManager
         return $result;
     }
 
+    /**
+     * @throws Exception
+     */
+    public function getTaskList($data): array
+    {
+        $status = $data["status"];
+        $searchKey = $data["searchKey"];
+        $whereCondition = isset($status) && $status!=="all" ? " AND status = '$status'" : "";
+        $whereCondition .= isset($data["dueDate"]) ? " AND DATE(due_date) = '" . $data['dueDate'] . "'" : "";
+        $whereCondition .= isset($searchKey) && $searchKey !== "" ? " AND name LIKE '%$searchKey%'" : "";
+
+        $queryString     = "SELECT userId, name, description, status, due_date as dueDate FROM tasks WHERE userId = ? ".$whereCondition;
+        $params          = array($data["userId"]);
+        return (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
+    }
 }

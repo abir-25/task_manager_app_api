@@ -134,4 +134,17 @@ class TaskController extends Controller
         }
     }
 
+    public function getTaskList(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $data           = $request->all();
+        $taskManager    = new TaskManager();
+
+        try {
+            $taskList = $taskManager->getTaskList($data);
+            return globalResponse($taskList, "Task list fetched successfully", true, $this->successStatusCode);
+        } catch (\Exception $ex){
+            return globalResponse([], $ex->getMessage(), false, $this->errorStatusCode);
+        }
+    }
+
 }

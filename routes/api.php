@@ -21,7 +21,7 @@ Route::group(['prefix' => '/v1'], function () {
         Route::post('/update-task-status',[Task::class,'postUpdateTaskStatusAction']);
         Route::get('/get-task-status-report',[Task::class,'getTaskStatusReportAction']);
         Route::post('/delete-task',[Task::class,'postDeleteTaskAction']);
-        Route::get('/get-task-list/{status?}/{dueDate?}',[Task::class,'getTaskList']);
+        Route::get('/get-task-list',[Task::class,'getTaskList']);
         Route::get('/get-task-info/{taskId}',[Task::class,'getTaskInfoById']);
         Route::get('/search-task/{keyword}',[Task::class,'getSearchTask']);
         Route::post('/delete-task',[Task::class,'postDeleteTaskAction']);
