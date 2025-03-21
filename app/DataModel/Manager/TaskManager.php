@@ -8,17 +8,31 @@ use Exception;
 
 class TaskManager
 {
+
+    /**
+     * @throws Exception
+     */
+    public function getLastTaskPositionByStatus($data): array
+    {
+        $queryString = "SELECT MAX(position) AS last_position
+                        FROM tasks
+                        WHERE status = ? and userId = ?";
+        $params      = array($data['status'], $data['userId']);
+        return  (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
+    }
+
     /**
      * @throws Exception
      */
     public function createTask(Task $task): Task
     {
-        $queryString      = "insert into tasks(userId, name, description, status, due_date, created_at) values(?,?,?,?,?,?)";
+        $queryString      = "insert into tasks(userId, name, description, status, position, due_date, created_at) values(?,?,?,?,?,?,?)";
         $queryParameter   = array();
         $queryParameter[] = $task->getUserId();
         $queryParameter[] = $task->getName();
         $queryParameter[] = $task->getDescription();
         $queryParameter[] = $task->getStatus();
+        $queryParameter[] = $task->getPosition();
         $queryParameter[] = $task->getDueDate();
         $queryParameter[] = now();
         $dbManager = new Database();
@@ -103,14 +117,35 @@ class TaskManager
      */
     public function getTaskList($data): array
     {
-        $status = $data["status"];
-        $searchKey = $data["searchKey"];
-        $whereCondition = isset($status) && $status!=="all" ? " AND status = '$status'" : "";
-        $whereCondition .= isset($data["dueDate"]) ? " AND DATE(due_date) = '" . $data['dueDate'] . "'" : "";
+        $status    = $data["status"] ?? "all";
+        $searchKey = $data["searchKey"] ?? null;
+        $dueDate   = $data["dueDate"] ?? null;
+        $whereCondition  = isset($status) && $status!=="all" ? " AND status = '$status'" : "";
+        $whereCondition .= isset($dueDate) ? " AND DATE(due_date) = '" . $dueDate . "'" : "";
         $whereCondition .= isset($searchKey) && $searchKey !== "" ? " AND name LIKE '%$searchKey%'" : "";
 
-        $queryString     = "SELECT userId, name, description, status, due_date as dueDate FROM tasks WHERE userId = ? ".$whereCondition;
+        $queryString     = "SELECT id, userId, position, name, description, status, due_date as dueDate FROM tasks WHERE userId = ? ".$whereCondition." ORDER BY position";
         $params          = array($data["userId"]);
         return (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getTaskStatusAndPoistionById($activeId, $userId)
+    {
+        $queryString = "SELECT status, position FROM tasks WHERE id = ? AND userId = ?";
+        $params      = array($activeId, $userId);
+        return  (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getTaskIdsAndPositionsBetweenActiveAndOverIds($greaterPosition, $lesserPosition, $status)
+    {
+        $queryString = "SELECT id, position FROM tasks WHERE status = ? AND position BETWEEN ? AND ? ORDER BY position";
+        $params      = array($status, $lesserPosition, $greaterPosition);
+        return  (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
     }
 }

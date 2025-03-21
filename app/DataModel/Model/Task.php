@@ -15,6 +15,7 @@ class Task {
     private $description;
     private $status;
     private $dueDate;
+    private $position;
     private $created_at;
     private $updated_at;
 
@@ -109,6 +110,22 @@ class Task {
     /**
      * @return mixed
      */
+    public function getPosition()
+    {
+        return $this->position;
+    }
+
+    /**
+     * @param mixed $position
+     */
+    public function setPosition($position): void
+    {
+        $this->position = $position;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getCreatedAt()
     {
         return $this->created_at;
@@ -147,6 +164,7 @@ class Task {
             'name'            => $this->getName(),
             'description'     => $this->getDescription(),
             'status'          => $this->getStatus(),
+            'position'        => $this->getPosition(),
             'dueDate'         => $this->getDueDate()
         ];
     }
@@ -158,6 +176,7 @@ class Task {
         $this->name        = (!empty($data['name'])) ? $data['name'] : null;
         $this->description = (!empty($data['description'])) ? $data['description'] : null;
         $this->status      = (!empty($data['status'])) ? $data['status'] : 1;
+        $this->position    = (!empty($data['position'])) ? $data['position'] : 0;
         $this->dueDate     = (!empty($data['dueDate'])) ? $data['dueDate'] : 1;
     }
 }
