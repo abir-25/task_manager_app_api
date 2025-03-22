@@ -57,12 +57,12 @@ class TaskManager
     /**
      * @throws Exception
      */
-    public function updateTaskStatus($task): void
+    public function updateTaskStatus($activeId, $status): void
     {
         $queryString = "UPDATE tasks
                         SET status = ?, updated_at = ?
                         WHERE id = ?";
-        $parameters = array($task->getStatus(), now(), $task->getId());
+        $parameters = array($status, now(), $activeId);
         (new Database())->executeQueryWithParameter($queryString, $parameters);
     }
 
@@ -124,7 +124,7 @@ class TaskManager
         $whereCondition .= isset($dueDate) ? " AND DATE(due_date) = '" . $dueDate . "'" : "";
         $whereCondition .= isset($searchKey) && $searchKey !== "" ? " AND name LIKE '%$searchKey%'" : "";
 
-        $queryString     = "SELECT id, userId, position, name, description, status, due_date as dueDate FROM tasks WHERE userId = ? ".$whereCondition." ORDER BY position";
+        $queryString     = "SELECT id, userId, position, name, description, status, DATE(due_date) as dueDate FROM tasks WHERE userId = ? ".$whereCondition." ORDER BY position";
         $params          = array($data["userId"]);
         return (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
     }
@@ -132,7 +132,7 @@ class TaskManager
     /**
      * @throws Exception
      */
-    public function getTaskStatusAndPoistionById($activeId, $userId)
+    public function getTaskStatusAndPositionById($activeId, $userId): array
     {
         $queryString = "SELECT status, position FROM tasks WHERE id = ? AND userId = ?";
         $params      = array($activeId, $userId);
@@ -142,10 +142,41 @@ class TaskManager
     /**
      * @throws Exception
      */
-    public function getTaskIdsAndPositionsBetweenActiveAndOverIds($greaterPosition, $lesserPosition, $status)
+    public function getTaskStatusAndPositionByStatus($status, $userId): array
+    {
+        $queryString = "SELECT MAX(position) as position FROM tasks WHERE status = ? AND userId = ?";
+        $params      = array($status, $userId);
+        return  (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getTaskIdsAndPositionsBetweenActiveAndOverIds($greaterPosition, $lesserPosition, $status): array
     {
         $queryString = "SELECT id, position FROM tasks WHERE status = ? AND position BETWEEN ? AND ? ORDER BY position";
         $params      = array($status, $lesserPosition, $greaterPosition);
         return  (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
     }
+
+    /**
+     * @throws Exception
+     */
+    public function getTaskPositionsFromOverIdToOthers($overIdPosition, $status): array
+    {
+        $queryString = "SELECT id, position FROM tasks WHERE status = ? AND position > ? ORDER BY position";
+        $params      = array($status, $overIdPosition);
+        return  (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getTaskPositionsFromActiveIdToOthers($activeIdPosition, $status): array
+    {
+        $queryString = "SELECT id, position FROM tasks WHERE status = ? AND position > ? ORDER BY position";
+        $params      = array($status, $activeIdPosition);
+        return  (new Database())->executeQueryDataReturnWithParameter($queryString, $params) ?? [];
+    }
+
 }

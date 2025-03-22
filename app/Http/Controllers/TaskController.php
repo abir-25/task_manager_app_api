@@ -75,7 +75,6 @@ class TaskController extends Controller
         $data           = $request->all();
         $task           = new Task();
         $taskManager    = new TaskManager();
-        $data["userId"] = $data["user"];
         $task->mapper($data);
 
         try {
@@ -92,39 +91,31 @@ class TaskController extends Controller
         }
     }
 
-    public function postUpdateTaskStatusAction(Request $request): \Illuminate\Http\JsonResponse
-    {
-        $data           = $request->all();
-        $task           = new Task();
-        $taskManager    = new TaskManager();
-        $task->mapper($data);
-
-        try {
-            if (!array_key_exists($data["status"], TaskArray::$taskStatus)) {
-                throw new Exception("Invalid status value: ".$data["status"]);
-            }
-
-            $taskManager->updateTaskStatus($task);
-            $taskInfo = $task->toJSON();
-
-            return globalResponse($taskInfo, "Congrats! Your task status is updated successfully", true, $this->successStatusCode);
-        } catch (\Exception $ex){
-            return globalResponse([], $ex->getMessage(), false, $this->errorStatusCode);
-        }
-    }
-
     public function postUpdateTaskPositionAction(Request $request): \Illuminate\Http\JsonResponse
     {
-        $data           = $request->all();
-        $taskManager    = new TaskManager();
-        $database       = new Database();
+        $data             = $request->all();
+        $taskManager      = new TaskManager();
+        $database         = new Database();
         try {
-            $activeIdStatusAndPosition = $taskManager->getTaskStatusAndPoistionById($data["activeId"], $data["userId"]);
-            $overIdStatusAndPosition   = $taskManager->getTaskStatusAndPoistionById($data["overId"], $data["userId"]);
+            $activeIdStatusAndPosition = $taskManager->getTaskStatusAndPositionById($data["activeId"], $data["userId"]);
+            if (is_numeric($data["overId"])) {
+                $overIdStatusAndPosition   = $taskManager->getTaskStatusAndPositionById($data["overId"], $data["userId"]);
+            }
+            else{
+                $overStatus = $this->formatStatus($data["overId"]);
+                $overIdStatusAndPosition   = $taskManager->getTaskStatusAndPositionByStatus($overStatus, $data["userId"]);
+                if(count($overIdStatusAndPosition)>0){
+                    if($overIdStatusAndPosition[0]->position != null){
+                        $overIdStatusAndPosition[0]->status = $overStatus;
+                    } else{
+                        $overIdStatusAndPosition = [];
+                    }
+                }
+            }
             if(count($activeIdStatusAndPosition)>0 && count($overIdStatusAndPosition)>0){
-                $updateRows = [];
-
                 if($activeIdStatusAndPosition[0]->status == $overIdStatusAndPosition[0]->status){
+                    $updateRows = [];
+
                     $direction       = $activeIdStatusAndPosition[0]->position > $overIdStatusAndPosition[0]->position ? "up" : "down";
                     $greaterPosition = max($activeIdStatusAndPosition[0]->position, $overIdStatusAndPosition[0]->position);
                     $lesserPosition  = min($activeIdStatusAndPosition[0]->position, $overIdStatusAndPosition[0]->position);
@@ -152,26 +143,64 @@ class TaskController extends Controller
                         }
                         $updateRows[$data["activeId"]] = [$activeIdNewPosition];
                     }
+                    $this->bulkUpdateTaskPosition($updateRows, $database);
+
                 } else{
+                    $taskManager->updateTaskStatus($data["activeId"], $overIdStatusAndPosition[0]->status);
+                    $taskIdPositionsFromOverIdToOthers = $taskManager->getTaskPositionsFromOverIdToOthers($overIdStatusAndPosition[0]->position, $overIdStatusAndPosition[0]->status);
+                    $taskIdPositionsFromActiveIdToOthers = $taskManager->getTaskPositionsFromActiveIdToOthers($activeIdStatusAndPosition[0]->position, $activeIdStatusAndPosition[0]->status);
 
-                }
+                    if(count($taskIdPositionsFromActiveIdToOthers)>0){
+                        $updateRows = [];
+                        foreach ($taskIdPositionsFromActiveIdToOthers as $item)
+                        {
+                            $updateRows[$item->id] = [--$item->position];
+                        }
+                        $this->bulkUpdateTaskPosition($updateRows, $database);
+                    }
 
-                if (count($updateRows) > 0) {
-                    $ids = array_keys($updateRows);
-                    $updateQuery = $database->bulk_update_sql_statement(
-                        'tasks',
-                        'id',
-                        'position',
-                        $updateRows,
-                        $ids
-                    );
-                    $database->executeQuery($updateQuery);
+                    if(count($taskIdPositionsFromOverIdToOthers)>0){
+                        $updateRows = [];
+                        $overIdPosition = $overIdStatusAndPosition[0]->position;
+                        $updateRows[$data["activeId"]] = [++$overIdPosition];
+                        foreach ($taskIdPositionsFromOverIdToOthers as $item)
+                        {
+                            $updateRows[$item->id] = [++$item->position];
+                        }
+                        $this->bulkUpdateTaskPosition($updateRows, $database);
+                    }
                 }
             }
             return globalResponse([], "Congrats! Your task position is updated", true, $this->successStatusCode);
         } catch (\Exception $ex){
             return globalResponse([], $ex->getMessage(), false, $this->errorStatusCode);
         }
+    }
+
+    public function bulkUpdateTaskPosition($updateRows, $database): void
+    {
+        if (count($updateRows) > 0) {
+            $ids = array_keys($updateRows);
+            $updateQuery = $database->bulk_update_sql_statement(
+                'tasks',
+                'id',
+                'position',
+                $updateRows,
+                $ids
+            );
+            $database->executeQuery($updateQuery);
+        }
+    }
+
+    private function formatStatus($status): string
+    {
+        $statusMap = [
+            "done" => "Done",
+            "todo" => "To Do",
+            "inprogress" => "In Progress"
+        ];
+
+        return $statusMap[strtolower($status)] ?? ucfirst($status);
     }
 
     public function postDeleteTaskAction(Request $request): \Illuminate\Http\JsonResponse
