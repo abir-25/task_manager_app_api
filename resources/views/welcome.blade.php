@@ -6,6 +6,7 @@
     <title>Welcome to Task Management System</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
+    <link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
     <style>
         body {
             background-color: #f8f9fa;
@@ -24,12 +25,14 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="card p-5">
-                <h1 class="text-primary">Task Manager App</h1>
-                <p class="lead">A powerful tool to streamline task management and boost productivity.</p>
-
+                <div class="text-center">
+                    <h1 class="text-primary"><a class="app-link" href="https://task.agameeit.com">Task Manager App</a></h1>
+                    <p class="lead">A powerful tool to streamline task management and boost productivity.</p>
+                    <a class="app-link-button btn btn-primary" href="https://task.agameeit.com" target="_blank">Try Now</a>
+                </div>
                 <h3 class="my-4">Developer Information</h3>
                 <p><strong>Name: </strong>Mohammad Abir Mahmud</p>
-                <p><strong>Designation: </strong>Software Engineer</p>
+                <p><strong>Designation: </strong>Software Engineer II</p>
                 <p><strong>Email: </strong>mahmud.abir025@gmail.com</p>
 
                 <div class="d-flex align-items-center justify-content-center social-icons my-5">
