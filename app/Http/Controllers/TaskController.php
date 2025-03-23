@@ -105,13 +105,10 @@ class TaskController extends Controller
                 $overStatus = $this->formatStatus($data["overId"]);
                 $overIdStatusAndPosition   = $taskManager->getTaskStatusAndPositionByStatus($overStatus, $data["userId"]);
                 if(count($overIdStatusAndPosition)>0){
-                    if($overIdStatusAndPosition[0]->position != null){
-                        $overIdStatusAndPosition[0]->status = $overStatus;
-                    } else{
-                        $overIdStatusAndPosition = [];
-                    }
+                    $overIdStatusAndPosition[0]->status = $overStatus;
                 }
             }
+
             if(count($activeIdStatusAndPosition)>0 && count($overIdStatusAndPosition)>0){
                 if($activeIdStatusAndPosition[0]->status == $overIdStatusAndPosition[0]->status){
                     $updateRows = [];
@@ -147,8 +144,8 @@ class TaskController extends Controller
 
                 } else{
                     $taskManager->updateTaskStatus($data["activeId"], $overIdStatusAndPosition[0]->status);
-                    $taskIdPositionsFromOverIdToOthers = $taskManager->getTaskPositionsFromOverIdToOthers($overIdStatusAndPosition[0]->position, $overIdStatusAndPosition[0]->status);
                     $taskIdPositionsFromActiveIdToOthers = $taskManager->getTaskPositionsFromActiveIdToOthers($activeIdStatusAndPosition[0]->position, $activeIdStatusAndPosition[0]->status);
+                    $taskIdPositionsFromOverIdToOthers = $taskManager->getTaskPositionsFromOverIdToOthers($overIdStatusAndPosition[0]->position, $overIdStatusAndPosition[0]->status);
 
                     if(count($taskIdPositionsFromActiveIdToOthers)>0){
                         $updateRows = [];
@@ -167,6 +164,9 @@ class TaskController extends Controller
                         {
                             $updateRows[$item->id] = [++$item->position];
                         }
+                        $this->bulkUpdateTaskPosition($updateRows, $database);
+                    } else if(count($taskIdPositionsFromOverIdToOthers)==0){
+                        $updateRows[$data["activeId"]] = [1];
                         $this->bulkUpdateTaskPosition($updateRows, $database);
                     }
                 }
