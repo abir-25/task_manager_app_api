@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('name', 255);
             $table->text('description')->nullable();
             $table->enum('status', ['To Do', 'In Progress', 'Done'])->default('To Do');
+            $table->integer('position');
             $table->timestamp('due_date');
             $table->timestamps();
         });
