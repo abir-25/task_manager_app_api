@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit; // Change to Feature test namespace
+namespace Tests\Unit;
 use Tests\TestCase;
 
 class UserApiTest extends TestCase
