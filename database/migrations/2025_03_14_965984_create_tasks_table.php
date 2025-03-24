@@ -19,7 +19,8 @@ return new class extends Migration
             $table->enum('status', ['To Do', 'In Progress', 'Done'])->default('To Do');
             $table->integer('position');
             $table->timestamp('due_date');
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->nullable();
         });
     }
 

@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('phone', 20)->nullable();
             $table->string('profileImg', 255)->nullable();
             $table->tinyInteger('status')->default(1);
-            $table->timestamps();
+            $table->timestamp('created_at')->useCurrent();
+            $table->timestamp('updated_at')->nullable();
         });
     }
 
