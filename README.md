@@ -12,7 +12,7 @@ This repository contains the backend API for the Task Manager App, developed usi
 ## 🚀 Features
 
 - User authentication (JWT-based)
-- CRUD operations for tasks.
+- CRUD operations for tasks
 - Update user profile
 - Database migrations
 - API documentation (Postman)
@@ -54,7 +54,7 @@ composer install
 ```
 
 Configure environment variable:
-- Create a .env file in the root directory.
+- Create a .env file in the root directory
 - Update database credentials
 ```bash
 DB_CONNECTION=mysql
@@ -72,7 +72,7 @@ Generate application key
 php artisan key:generate
 ```
 
-Run database migrationsy
+Run database migration
 
 ```bash
 php artisan migrate
