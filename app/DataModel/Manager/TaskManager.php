@@ -69,10 +69,10 @@ class TaskManager
     /**
      * @throws Exception
      */
-    public function deleteTask($id): void
+    public function deleteTask($id, $userId): void
     {
-        $queryString = "DELETE FROM tasks WHERE id = ?";
-        $parameters = array($id);
+        $queryString = "DELETE FROM tasks WHERE id = ? AND userId = ?";
+        $parameters = array($id, $userId);
         (new Database())->executeQueryWithParameter($queryString, $parameters);
     }
 

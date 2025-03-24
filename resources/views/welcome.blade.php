@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Task Management System</title>
+    <title>Welcome to Task Manager App</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link rel="shortcut icon" href="images/logo.png" type="image/x-icon">
@@ -26,6 +26,7 @@
         <div class="col-md-8">
             <div class="card p-5">
                 <div class="text-center">
+                    <img class="logo" src="images/logo.png" alt="">
                     <h1 class="text-primary"><a class="app-link" href="https://task.agameeit.com">Task Manager App</a></h1>
                     <p class="lead">A powerful tool to streamline task management and boost productivity.</p>
                     <a class="app-link-button btn btn-primary" href="https://task.agameeit.com" target="_blank">Try Now</a>

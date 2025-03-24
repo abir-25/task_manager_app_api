@@ -209,7 +209,7 @@ class TaskController extends Controller
         $taskManager    = new TaskManager();
 
         try {
-            $taskManager->deleteTask($data['id']);
+            $taskManager->deleteTask($data['taskId'], $data['userId']);
 
             return globalResponse([], "Congrats! Your task is deleted successfully", true, $this->successStatusCode);
         } catch (\Exception $ex){
